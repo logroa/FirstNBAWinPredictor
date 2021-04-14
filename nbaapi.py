@@ -28,6 +28,9 @@ def odds_finder(team_name):
             playToday = True
             if team_name == i['home_team']:
                 homeTeam = True
+                opponent = i['teams'][1]
+            else:
+                opponent = i['teams'][0]
             break
     if playToday == True:
         outputOdds = []
@@ -36,11 +39,11 @@ def odds_finder(team_name):
             odds = j['odds']['h2h']
             home = "No"
             if homeTeam == True:
-                odd = odds[1]
+                odd = odds[0]
                 home = "Yes"
             else:
-                odd = odds[0]
-            outputOdds.append((name, odd, home))
+                odd = odds[1]
+            outputOdds.append((name, odd, home, opponent))
         return outputOdds
     else:
         print("Specified team not playing today.")
@@ -55,7 +58,7 @@ def winPercCalc(num):
     return round(perc*100, 2)
 
 def outputter(name, outputList):
-    print(name + ", Home Team? " + outputList[0][3])
+    print(name + ", Home Team: " + outputList[0][3] + "; Opponent: " + outputList[0][4])
     print("BOOK    ODDS    WINNING PERCENTAGE")
     for i in outputList:
         print(i[0] + " " + str(i[1]) + " " + str(i[2]))
@@ -67,5 +70,5 @@ if __name__ == "__main__":
     if siteList != None:
         oddsList = []
         for i in siteList:
-            oddsList.append((i[0], i[1], winPercCalc(i[1]), i[2]))
+            oddsList.append((i[0], i[1], winPercCalc(i[1]), i[2], i[3]))
         outputter(name, oddsList)
