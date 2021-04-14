@@ -28,21 +28,21 @@ def odds_finder(team_name):
             playToday = True
             if team_name == i['home_team']:
                 homeTeam = True
+            if team_name == i['teams'][0]:
+                oddInd = 0
                 opponent = i['teams'][1]
-            else:
+            if team_name == i['teams'][1]:
+                oddInd = 1
                 opponent = i['teams'][0]
             break
     if playToday == True:
         outputOdds = []
         for j in i['sites']:
             name = j['site_nice']
-            odds = j['odds']['h2h']
+            odd = j['odds']['h2h'][oddInd]
             home = "No"
             if homeTeam == True:
-                odd = odds[0]
                 home = "Yes"
-            else:
-                odd = odds[1]
             outputOdds.append((name, odd, home, opponent))
         return outputOdds
     else:
