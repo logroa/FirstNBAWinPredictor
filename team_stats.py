@@ -89,15 +89,17 @@ def stats(team):
     now = str(now)
     if result and result[8] == now:
         val = {}
-        val['Team'] = team
-        val['Abbreviation'] = ab
-        val['Points Per Game'] = result[1]
-        val['Rebounds Per Game'] = result[2]
-        val['Assists Per Game'] = result[3]
-        val['Points Allowed'] = result[4]
-        val['Wins'] = result[5]
-        val['Losses'] = result[6]
-        val['Last 10 Win Percentage'] = result[7]
+        cur.execute(f'SELECT * FROM Team_Stats JOIN Teams WHERE Teams.id = Team_Stats.Team_id AND Teams.Team = "{team}"')
+        one = cur.fetchone()
+        val['Team'] = one[10]
+        val['Abbreviation'] = one[11]
+        val['Points Per Game'] = one[1]
+        val['Rebounds Per Game'] = one[2]
+        val['Assists Per Game'] = one[3]
+        val['Points Allowed'] = one[4]
+        val['Wins'] = one[5]
+        val['Losses'] = one[6]
+        val['Last 10 Win Percentage'] = one[7]
         return val
     if result and result[8] != now:
         val = get_team_stats(team)
@@ -123,7 +125,7 @@ def make_id_table():
     conn.commit()
 
 
-make_id_table()
+print(stats("Oklahoma City Thunder"))
 
 
 
