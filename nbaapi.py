@@ -2,6 +2,7 @@ import requests
 import json
 import sqlite3
 from datetime import date
+import os
 
 def odds_finder(team_name):
     url = "https://odds.p.rapidapi.com/v1/odds"
@@ -83,11 +84,12 @@ def dbAddition(name, oL, cur, conn):
                 winpercSUGARHOUSE, oddsPOINTSBET, winpercPOINTSBET, oddsBETFAIR, winpercBETFAIR, oddsBETONLINE, winpercBETONLINE, oddsWILLIAMHILL,
                 winpercWILLIAMHILL, oddsINTERTOPS, winpercINTERTOPS, oddsGTBETS, winpercGTBETS, oddsBOOKMAKER, winpercBOOKMAKER, oddsMYBOOKIE, 
                 winpercMYBOOKIE, oddsCAESARS, winpercCAESARS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today(), name, oL[0][3], oL[0][4], 
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), name, oL[0][3], oL[0][4], 
                 oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
                 oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
-                oL[14][1], oL[14][2], oL[15][1], oL[15][2],)))
+                oL[14][1], oL[14][2], oL[15][1], oL[15][2]))
     conn.commit()
+    print("Data added to database")
 
 
 if __name__ == "__main__":
