@@ -1,5 +1,8 @@
 import requests
 import json
+import sqlite3
+from datetime import date
+import os
 
 def odds_finder(team_name):
     url = "https://odds.p.rapidapi.com/v1/odds"
@@ -63,6 +66,31 @@ def outputter(name, outputList):
     for i in outputList:
         print(i[0] + " " + str(i[1]) + " " + str(i[2]))
 
+def dbMaker(cur, conn):
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS Moneylines (Date TEXT, Team TEXT, HomeTeam TEXT, Opponent TEXT, oddsFANDUEL INTEGER,
+                winpercFANDUEL REAL, oddsFOXBET INTEGER, winpercFOXBET REAL, oddsBOVADA INTEGER, winpercBOVADA REAL, 
+                oddsUNIBET INTEGER, winpercUNIBET REAL, oddsBETRIVERS INTEGER, winpercBETRIVER REAL, oddsDRAFTKINGS INTEGER,
+                winpercDRAFTKINGS REAL, oddsSUGARHOUSE INTEGER, winpercSUGARHOUSE REAL, oddsPOINTSBET INTEGER, winpercPOINTSBET REAL,
+                oddsBETFAIR INTEGER, winpercBETFAIR REAL, oddsBETONLINE INTEGER, winpercBETONLINE REAL, oddsWILLIAMHILL INTEGER,
+                winpercWILLIAMHILL REAL, oddsINTERTOPS INTEGER, winpercINTERTOPS REAL, oddsGTBETS INTEGER, winpercGTBETS REAL,
+                oddsBOOKMAKER INTEGER, winpercBOOKMAKER REAL, oddsMYBOOKIE INTEGER, winpercMYBOOKIE REAL, oddsCAESARS INTEGER,
+                winpercCAESARS REAL)''')
+    conn.commit()
+
+def dbAddition(name, oL, cur, conn):
+    cur.execute('''INSERT INTO Moneylines (Date, Team, HomeTeam, Opponent, oddsFANDUEL, winpercFANDUEL, oddsFOXBET, winpercFOXBET, oddsBOVADA, 
+                winpercBOVADA, oddsUNIBET, winpercUNIBET, oddsBETRIVERS, winpercBETRIVER, oddsDRAFTKINGS, winpercDRAFTKINGS, oddsSUGARHOUSE,
+                winpercSUGARHOUSE, oddsPOINTSBET, winpercPOINTSBET, oddsBETFAIR, winpercBETFAIR, oddsBETONLINE, winpercBETONLINE, oddsWILLIAMHILL,
+                winpercWILLIAMHILL, oddsINTERTOPS, winpercINTERTOPS, oddsGTBETS, winpercGTBETS, oddsBOOKMAKER, winpercBOOKMAKER, oddsMYBOOKIE, 
+                winpercMYBOOKIE, oddsCAESARS, winpercCAESARS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), name, oL[0][3], oL[0][4], 
+                oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
+                oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
+                oL[14][1], oL[14][2], oL[15][1], oL[15][2]))
+    conn.commit()
+    print("Data added to database")
+
 
 if __name__ == "__main__":
     name = input("Enter a team name with capitalized first letters and the city (ex. Washington Wizards): ")
@@ -72,3 +100,8 @@ if __name__ == "__main__":
         for i in siteList:
             oddsList.append((i[0], i[1], winPercCalc(i[1]), i[2], i[3]))
         outputter(name, oddsList)
+        path = os.path.dirname(os.path.abspath(__file__))
+        conn = sqlite3.connect(path+'/'+'stats.db')
+        cur = conn.cursor()
+        dbMaker(cur, conn)
+        dbAddition(name, oddsList, cur, conn)
