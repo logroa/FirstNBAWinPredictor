@@ -3,6 +3,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
+from datetime import date
 
 path = os.path.dirname(os.path.abspath(__file__))
 conn = sqlite3.connect(path+'/'+'stats.db')
@@ -22,6 +23,8 @@ def team_abrevs():
         team = names[1].text
         team = team.strip()
         abrevs[team] = abr
+    abrevs['New Orleans Pelicans'] = 'NO'
+    abrevs['Utah Jazz'] = 'UTAH'
     return abrevs
 
 def get_team_stats(team):
@@ -48,7 +51,7 @@ def get_team_stats(team):
         value = first[1].text
         output[category] = value
 
-    stats = sections[7]
+    stats = column.find('article', class_ = "sub-module teamseasonhistory")
     blocks = stats.find_all('td')
     w = blocks[1].text
     l = blocks[2].text
@@ -79,37 +82,48 @@ def stats(team):
     else:
         print("team not found")
         return
-    cur.execute('CREATE TABLE IF NOT EXISTS Team_Stats (Team_id INTEGER, PPG INTEGER, RPG INTEGER, APG INTEGER, Points_Allowed INTEGER, Wins INTEGER, Losses INTEGER, Last_10_Win_Percentage REAL)')
+    cur.execute('CREATE TABLE IF NOT EXISTS Team_Stats (Team_id INTEGER, PPG REAL, RPG REAL, APG REAL, Points_Allowed REAL, Wins INTEGER, Losses INTEGER, Last_10_Win_Percentage REAL, Last_updated TEXT)')
     cur.execute(f"SELECT * FROM Team_Stats WHERE Team_id = '{ident}'")
     result = cur.fetchone()
-    if result:
+    now = date.today()
+    now = str(now)
+    if result and result[8] == now:
         val = {}
         val['Team'] = team
         val['Abbreviation'] = ab
-        val['Points Per Game'] = result[2]
-        val['Rebounds Per Game'] = result[3]
-        val['Assists Per Game'] = result[4]
-        val['Points Allowed'] = result[5]
-        val['Wins'] = result[6]
-        val['Losses'] = result[7]
-        val['Last 10 Win Percentage'] = result[8]
+        val['Points Per Game'] = result[1]
+        val['Rebounds Per Game'] = result[2]
+        val['Assists Per Game'] = result[3]
+        val['Points Allowed'] = result[4]
+        val['Wins'] = result[5]
+        val['Losses'] = result[6]
+        val['Last 10 Win Percentage'] = result[7]
         return val
-    else:
+    if result and result[8] != now:
         val = get_team_stats(team)
-        cur.execute("INSERT INTO Team_Stats (Team_id, PPG, RPG, APG, Points_Allowed, Wins, Losses, Last_10_Win_Percentage) VALUES (?,?,?,?,?,?,?,?)",
-        (ident, val['Points Per Game'], val['Rebounds Per Game'], val['Assists Per Game'], val['Points Allowed'], val['Wins'], val['Losses'], val['Last 10 Win Percentage']))
+        cur.execute(f"UPDATE Team_Stats SET PPG = '{val['Points Per Game']}', RPG = '{val['Rebounds Per Game']}', APG = '{val['Assists Per Game']}', Points_Allowed = '{val['Points Allowed']}', Wins = '{val['Wins']}', Losses = '{val['Losses']}', Last_updated = '{now}' WHERE Team_id = '{ident}'")
+        conn.commit()
+        return val
+    if not result:
+        val = get_team_stats(team)
+        cur.execute("INSERT INTO Team_Stats (Team_id, PPG, RPG, APG, Points_Allowed, Wins, Losses, Last_10_Win_Percentage, Last_updated) VALUES (?,?,?,?,?,?,?,?,?)",
+        (ident, val['Points Per Game'], val['Rebounds Per Game'], val['Assists Per Game'], val['Points Allowed'], val['Wins'], val['Losses'], val['Last 10 Win Percentage'], now))
         conn.commit()
         return val
 
 def make_id_table():
     abrevs = team_abrevs()
     cur.execute('CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, Team TEXT, Abbreviation TEXT)')
+    cur.execute("SELECT * FROM Teams")
+    result = cur.fetchone()
+    if result:
+        return
     for key in abrevs:
         cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
     conn.commit()
 
-print(stats("Washington Wizards"))
 
+make_id_table()
 
 
 
