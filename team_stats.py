@@ -4,6 +4,10 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 
+path = os.path.dirname(os.path.abspath(__file__))
+conn = sqlite3.connect(path+'/'+'stats.db')
+cur = conn.cursor()
+
 def team_abrevs():
     abrevs = {}
     wiki = requests.get("https://en.wikipedia.org/wiki/Wikipedia:WikiProject_National_Basketball_Association/National_Basketball_Association_team_abbreviations")
@@ -62,9 +66,6 @@ def get_team_stats(team):
     return output
 
 def stats(team):
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path+'/'+'stats.db')
-    cur = conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS Team_Stats (Team TEXT, Abbreviation TEXT, PPG INTEGER, RPG INTEGER, APG INTEGER, Points_Allowed INTEGER, Wins INTEGER, Losses INTEGER, Last_10_Win_Percentage REAL)')
     cur.execute(f"SELECT * FROM Team_Stats where Team = '{team}'")
     result = cur.fetchone()
@@ -87,7 +88,14 @@ def stats(team):
         conn.commit()
         return val
 
-print(stats("Washington Wizards"))
+def make_id_table():
+    abrevs = team_abrevs()
+    cur.execute('CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, Team TEXT, Abbreviation TEXT)')
+    for key in abrevs:
+        cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
+    conn.commit()
+
+print(stats("Oklahoma City Thunder"))
 
 
 
