@@ -104,8 +104,12 @@ if __name__ == "__main__":
         for i in siteList:
             oddsList.append((i[0], i[1], winPercCalc(i[1]), i[2], i[3]))
         outputter(name, oddsList)
-        path = os.path.dirname(os.path.abspath(__file__))
-        conn = sqlite3.connect(path+'/'+'stats.db')
-        cur = conn.cursor()
-        dbMaker(cur, conn)
-        dbAddition(name, oddsList, cur, conn)
+        if len(oddsList) < 17:
+            print("Game has likely already started, so the lines above are LIVE LINES")
+
+        else:
+            path = os.path.dirname(os.path.abspath(__file__))
+            conn = sqlite3.connect(path+'/'+'stats.db')
+            cur = conn.cursor()
+            dbMaker(cur, conn)
+            dbAddition(name, oddsList, cur, conn)
