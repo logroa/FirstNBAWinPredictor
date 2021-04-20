@@ -81,7 +81,7 @@ class TwitterStreamer():
         self.twitter_authenticator = TwitterAuthenticator()
 
     def stream_tweets(self, fetched_tweet_filename, hash_tag_list):
-        # handles twitter authentification and connection to twitter streaming api
+        # handles twitter authentication and connection to twitter streaming api
         listener = TwitterListener(fetched_tweet_filename)
         auth = self.twitter_authenticator.authenticate_twitter_app()
         stream = Stream(auth, listener)
@@ -106,6 +106,10 @@ class TwitterListener(StreamListener):
             # check for twitter rates limit to prevent banning
             return False
         print(status)
+
+    def keep_fetching(self, status, state):
+
+        pass
 
 class TweetAnalyzer():
     def clean_tweet(self, tweet):
@@ -155,7 +159,7 @@ class TweetAnalyzer():
 
 if __name__ == "__main__":
     
-    hash_tag_list = input("Enter something to be search on Twitter: ")
+    hash_tag_list = input("Enter something to be searched on Twitter: ")
 
     twitter_client = TwitterClient()
     tweet_analyzer = TweetAnalyzer()
