@@ -67,8 +67,7 @@ def outputter(name, outputList):
         print(i[0] + " " + str(i[1]) + " " + str(i[2]))
 
 def dbMaker(cur, conn):
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS Moneylines (Date TEXT, Team TEXT, HomeTeam TEXT, Opponent TEXT, oddsFANDUEL INTEGER,
+    cur.execute('''CREATE TABLE IF NOT EXISTS Moneylines (Date TEXT, Team_id INTEGER, HomeTeam TEXT, Opponent_id INTEGER, oddsFANDUEL INTEGER,
                 winpercFANDUEL REAL, oddsFOXBET INTEGER, winpercFOXBET REAL, oddsBOVADA INTEGER, winpercBOVADA REAL, 
                 oddsUNIBET INTEGER, winpercUNIBET REAL, oddsBETRIVERS INTEGER, winpercBETRIVER REAL, oddsDRAFTKINGS INTEGER,
                 winpercDRAFTKINGS REAL, oddsSUGARHOUSE INTEGER, winpercSUGARHOUSE REAL, oddsPOINTSBET INTEGER, winpercPOINTSBET REAL,
@@ -79,12 +78,17 @@ def dbMaker(cur, conn):
     conn.commit()
 
 def dbAddition(name, oL, cur, conn):
-    cur.execute('''INSERT INTO Moneylines (Date, Team, HomeTeam, Opponent, oddsFANDUEL, winpercFANDUEL, oddsFOXBET, winpercFOXBET, oddsBOVADA, 
+    cur.execute("SELECT id FROM Teams WHERE Team = ?", (name,))
+    tid = int(cur.fetchone()[0])
+    cur.execute("SELECT id FROM Teams WHERE Team = ?", (oL[0][4],))
+    oid = int(cur.fetchone()[0])
+
+    cur.execute('''INSERT INTO Moneylines (Date, Team_id, HomeTeam, Opponent_id, oddsFANDUEL, winpercFANDUEL, oddsFOXBET, winpercFOXBET, oddsBOVADA, 
                 winpercBOVADA, oddsUNIBET, winpercUNIBET, oddsBETRIVERS, winpercBETRIVER, oddsDRAFTKINGS, winpercDRAFTKINGS, oddsSUGARHOUSE,
                 winpercSUGARHOUSE, oddsPOINTSBET, winpercPOINTSBET, oddsBETFAIR, winpercBETFAIR, oddsBETONLINE, winpercBETONLINE, oddsWILLIAMHILL,
                 winpercWILLIAMHILL, oddsINTERTOPS, winpercINTERTOPS, oddsGTBETS, winpercGTBETS, oddsBOOKMAKER, winpercBOOKMAKER, oddsMYBOOKIE, 
                 winpercMYBOOKIE, oddsCAESARS, winpercCAESARS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), name, oL[0][3], oL[0][4], 
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), tid, oL[0][3], oid, 
                 oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
                 oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
                 oL[14][1], oL[14][2], oL[15][1], oL[15][2]))
