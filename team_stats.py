@@ -78,18 +78,17 @@ def stats(team):
     result = cur.fetchone()
     if result:
         ident = result[0]
-        ab = result[2]
     else:
         print("team not found")
         return
-    cur.execute('CREATE TABLE IF NOT EXISTS Team_Stats (Team_id INTEGER, PPG REAL, RPG REAL, APG REAL, Points_Allowed REAL, Wins INTEGER, Losses INTEGER, Last_10_Win_Percentage REAL, Last_updated TEXT)')
-    cur.execute(f"SELECT * FROM Team_Stats WHERE Team_id = '{ident}'")
-    result = cur.fetchone()
     now = date.today()
     now = str(now)
+    cur.execute('CREATE TABLE IF NOT EXISTS Team_Stats (Team_id INTEGER, PPG REAL, RPG REAL, APG REAL, Points_Allowed REAL, Wins INTEGER, Losses INTEGER, Last_10_Win_Percentage REAL, Last_updated TEXT)')
+    cur.execute(f"SELECT * FROM Team_Stats WHERE Team_id = '{ident}' AND Last_updated = '{now}'")
+    result = cur.fetchone()
     if result and result[8] == now:
         val = {}
-        cur.execute(f'SELECT * FROM Team_Stats JOIN Teams WHERE Teams.id = Team_Stats.Team_id AND Teams.Team = "{team}"')
+        cur.execute(f'SELECT * FROM Team_Stats JOIN Teams WHERE Teams.id = Team_Stats.Team_id AND Teams.Team = "{team}" AND Team_Stats.Last_updated = "{now}"')
         one = cur.fetchone()
         val['Team'] = one[10]
         val['Abbreviation'] = one[11]
@@ -101,12 +100,7 @@ def stats(team):
         val['Losses'] = one[6]
         val['Last 10 Win Percentage'] = one[7]
         return val
-    if result and result[8] != now:
-        val = get_team_stats(team)
-        cur.execute(f"UPDATE Team_Stats SET PPG = '{val['Points Per Game']}', RPG = '{val['Rebounds Per Game']}', APG = '{val['Assists Per Game']}', Points_Allowed = '{val['Points Allowed']}', Wins = '{val['Wins']}', Losses = '{val['Losses']}', Last_updated = '{now}' WHERE Team_id = '{ident}'")
-        conn.commit()
-        return val
-    if not result:
+    else:
         val = get_team_stats(team)
         cur.execute("INSERT INTO Team_Stats (Team_id, PPG, RPG, APG, Points_Allowed, Wins, Losses, Last_10_Win_Percentage, Last_updated) VALUES (?,?,?,?,?,?,?,?,?)",
         (ident, val['Points Per Game'], val['Rebounds Per Game'], val['Assists Per Game'], val['Points Allowed'], val['Wins'], val['Losses'], val['Last 10 Win Percentage'], now))
@@ -124,12 +118,6 @@ def make_id_table():
         cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
     conn.commit()
 
-
-print(stats("Oklahoma City Thunder"))
-
-
-
-
-
-
-
+ab = team_abrevs()
+for keys in ab:
+    print(stats(keys))
