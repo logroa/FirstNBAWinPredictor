@@ -75,6 +75,12 @@ def tabMaker(cur, conn):
     OffEff REAL, DefEff REAL)''')
     conn.commit()
 
+def additionChecker(cur, conn):
+    cur.execute('''SELECT Date FROM AdvStats WHERE Date = ?''', (str(date.today()),))
+    if len(cur.fetchall()) > 0:
+        return False
+    return True
+
 def tabAddition(cur, conn, line):
     cur.execute("SELECT id FROM Teams WHERE Abbreviation = ?", (teamConvert(line[0]),))
     tid = int(cur.fetchone()[0])
@@ -95,8 +101,12 @@ if __name__ == "__main__":
     conn = sqlite3.connect(path+'/'+'stats.db')
     cur = conn.cursor()
     tabMaker(cur, conn)
-    for i in data:
-        tabAddition(cur, conn, i)
+    if additionChecker(cur, conn):
+        for i in data:
+            tabAddition(cur, conn, i)
+        print("Advanced Data added to database")    
+    else:
+        print("Database up to date.  No need to add found data.")
     Printer(data)
-    print("Advanced Data added to database")
+
 
