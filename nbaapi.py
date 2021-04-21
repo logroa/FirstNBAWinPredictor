@@ -77,23 +77,39 @@ def dbMaker(cur, conn):
                 winpercCAESARS REAL)''')
     conn.commit()
 
+def updateTable(tid, oL, cur, conn):
+    cur.execute('''UPDATE Moneylines SET oddsFANDUEL = ?, winpercFANDUEL = ?, oddsFOXBET = ?, winpercFOXBET = ?, oddsBOVADA = ?, 
+                    winpercBOVADA = ?, oddsUNIBET = ?, winpercUNIBET = ?, oddsBETRIVERS = ?, winpercBETRIVER = ?, oddsDRAFTKINGS = ?, 
+                    winpercDRAFTKINGS = ?, oddsSUGARHOUSE = ?,
+                    winpercSUGARHOUSE = ?, oddsPOINTSBET = ?, winpercPOINTSBET = ?, oddsBETFAIR = ?, winpercBETFAIR = ?, oddsBETONLINE = ?, winpercBETONLINE = ?, oddsWILLIAMHILL = ?,
+                    winpercWILLIAMHILL = ?, oddsINTERTOPS = ?, winpercINTERTOPS = ?, oddsGTBETS = ?, winpercGTBETS = ?, oddsBOOKMAKER = ?, winpercBOOKMAKER = ?, oddsMYBOOKIE = ?, 
+                    winpercMYBOOKIE = ?, oddsCAESARS = ?, winpercCAESARS = ? WHERE Date = ? AND Team_id = ?''', (oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
+                    oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
+                    oL[14][1], oL[14][2], oL[15][1], oL[15][2], str(date.today()), tid))
+    conn.commit()
+    print("Database updated for changed lines.")
+
 def dbAddition(name, oL, cur, conn):
     cur.execute("SELECT id FROM Teams WHERE Team = ?", (name,))
     tid = int(cur.fetchone()[0])
     cur.execute("SELECT id FROM Teams WHERE Team = ?", (oL[0][4],))
     oid = int(cur.fetchone()[0])
 
-    cur.execute('''INSERT INTO Moneylines (Date, Team_id, HomeTeam, Opponent_id, oddsFANDUEL, winpercFANDUEL, oddsFOXBET, winpercFOXBET, oddsBOVADA, 
-                winpercBOVADA, oddsUNIBET, winpercUNIBET, oddsBETRIVERS, winpercBETRIVER, oddsDRAFTKINGS, winpercDRAFTKINGS, oddsSUGARHOUSE,
-                winpercSUGARHOUSE, oddsPOINTSBET, winpercPOINTSBET, oddsBETFAIR, winpercBETFAIR, oddsBETONLINE, winpercBETONLINE, oddsWILLIAMHILL,
-                winpercWILLIAMHILL, oddsINTERTOPS, winpercINTERTOPS, oddsGTBETS, winpercGTBETS, oddsBOOKMAKER, winpercBOOKMAKER, oddsMYBOOKIE, 
-                winpercMYBOOKIE, oddsCAESARS, winpercCAESARS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), tid, oL[0][3], oid, 
-                oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
-                oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
-                oL[14][1], oL[14][2], oL[15][1], oL[15][2]))
-    conn.commit()
-    print("Data added to database")
+    cur.execute("SELECT * FROM Moneylines WHERE Date = ? AND Team_id = ?", (str(date.today()), tid))
+    if len(cur.fetchall()) > 0:
+        updateTable(tid, oL, cur, conn)
+    else:
+        cur.execute('''INSERT INTO Moneylines (Date, Team_id, HomeTeam, Opponent_id, oddsFANDUEL, winpercFANDUEL, oddsFOXBET, winpercFOXBET, oddsBOVADA, 
+                    winpercBOVADA, oddsUNIBET, winpercUNIBET, oddsBETRIVERS, winpercBETRIVER, oddsDRAFTKINGS, winpercDRAFTKINGS, oddsSUGARHOUSE,
+                    winpercSUGARHOUSE, oddsPOINTSBET, winpercPOINTSBET, oddsBETFAIR, winpercBETFAIR, oddsBETONLINE, winpercBETONLINE, oddsWILLIAMHILL,
+                    winpercWILLIAMHILL, oddsINTERTOPS, winpercINTERTOPS, oddsGTBETS, winpercGTBETS, oddsBOOKMAKER, winpercBOOKMAKER, oddsMYBOOKIE, 
+                    winpercMYBOOKIE, oddsCAESARS, winpercCAESARS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (str(date.today()), tid, oL[0][3], oid, 
+                    oL[0][1], oL[0][2], oL[1][1], oL[1][2], oL[2][1], oL[2][2], oL[3][1], oL[3][2], oL[4][1], oL[4][2], oL[5][1], oL[5][2], oL[6][1], oL[6][2],
+                    oL[7][1], oL[7][2], oL[8][1], oL[8][2], oL[9][1], oL[9][2], oL[10][1], oL[10][2], oL[11][1], oL[11][2], oL[12][1], oL[12][2], oL[13][1], oL[13][2],
+                    oL[14][1], oL[14][2], oL[15][1], oL[15][2]))
+        conn.commit()
+        print("Data added to database")
 
 
 if __name__ == "__main__":
