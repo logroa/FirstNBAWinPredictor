@@ -14,6 +14,9 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt
 
+import sqlite3
+import json
+
 consumer_key = "AUds4eS1BHAq2UcjeaBbmQi0K"
 consumer_secret = "iVWKUBzAclrz1ow3XBP5ReMwAX6WUBO9NaXlCYEeiHGj5UVN7a"
 access_token = "1319171958286749697-n8l6vveS4glZHOQUHxnH6ozI6ek2eI"
@@ -86,6 +89,10 @@ class TwitterStreamer():
         auth = self.twitter_authenticator.authenticate_twitter_app()
         stream = Stream(auth, listener)
         stream.filter(track=hash_tag_list)
+
+    def db_maker(cur, conn):
+
+        pass
 
 class TwitterListener(StreamListener):
     def __init__(self, fetched_tweet_filename):
@@ -165,7 +172,7 @@ if __name__ == "__main__":
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
 
-    tweets = twitter_client.keywords_search(hash_tag_list, 10000, dt.date.today()-dt.timedelta(days=30), dt.date.today())
+    tweets = twitter_client.keywords_search(hash_tag_list, 1000, dt.date.today()-dt.timedelta(days=30), dt.date.today())
 
     df = tweet_analyzer.tweets_to_dataframe(tweets)
 
