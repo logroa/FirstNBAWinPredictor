@@ -8,6 +8,7 @@ from datetime import date
 path = os.path.dirname(os.path.abspath(__file__))
 conn = sqlite3.connect(path+'/'+'stats.db')
 cur = conn.cursor()
+#testing
 
 def team_abrevs():
     abrevs = {}
