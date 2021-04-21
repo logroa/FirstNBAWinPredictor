@@ -119,6 +119,6 @@ def make_id_table():
         cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
     conn.commit()
 
-ab = team_abrevs()
-for keys in ab:
-    print(stats(keys))
+#ab = team_abrevs()
+#for keys in ab:
+    #print(stats(keys))
