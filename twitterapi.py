@@ -6,6 +6,7 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 
 import datetime as dt
+from datetime import date
 
 from textblob import TextBlob
 
@@ -13,7 +14,7 @@ import numpy as np
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
-
+import os
 import sqlite3
 import json
 
@@ -21,6 +22,10 @@ consumer_key = "AUds4eS1BHAq2UcjeaBbmQi0K"
 consumer_secret = "iVWKUBzAclrz1ow3XBP5ReMwAX6WUBO9NaXlCYEeiHGj5UVN7a"
 access_token = "1319171958286749697-n8l6vveS4glZHOQUHxnH6ozI6ek2eI"
 access_token_secret = "X9WKg1NTCmc96R9KscIpJrtQyLcHRMLF1YGuwAgT0MPy2"
+
+path = os.path.dirname(os.path.abspath(__file__))
+conn = sqlite3.connect(path+'/'+'stats.db')
+cur = conn.cursor()
 
 class TwitterClient():
     def __init__(self, twitter_user=None):
@@ -90,10 +95,6 @@ class TwitterStreamer():
         stream = Stream(auth, listener)
         stream.filter(track=hash_tag_list)
 
-    def db_maker(cur, conn):
-
-        pass
-
 class TwitterListener(StreamListener):
     def __init__(self, fetched_tweet_filename):
         self.fetched_tweet_filename = fetched_tweet_filename
@@ -113,10 +114,6 @@ class TwitterListener(StreamListener):
             # check for twitter rates limit to prevent banning
             return False
         print(status)
-
-    def keep_fetching(self, status, state):
-
-        pass
 
 class TweetAnalyzer():
     def clean_tweet(self, tweet):
@@ -162,7 +159,58 @@ class TweetAnalyzer():
         tweetsGrouped1 = df[['day', 'pop', 'score']].groupby('day')['score'].agg(np.sum)
 
         df2 = pd.DataFrame({'Relevance' : tweetsGrouped, 'Popularity' : tweetsGrouped1}).reset_index()
-        return df2 
+        return df2
+
+def db_maker(cur, conn):
+
+    cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Team_id INTEGER, Relevance REAL, Popularity REAL)')
+    conn.commit()
+
+def db_add(cur, conn, team, df):
+
+    cur.execute(f'SELECT * FROM Teams WHERE Team = "{team}"')
+    result = cur.fetchone()
+    if result:
+        ident = result[0]
+    else:
+        print("team not found")
+        return
+
+    now = date.today()
+    now = str(now)
+
+    cur.execute(f"SELECT * FROM TwitterData WHERE Team_id = '{ident}' AND Date = '{now}'")
+
+    result = cur.fetchone()
+    if result and result[0] == now:
+
+        twitter_dict = {}
+
+        twitter_dict['Date'] = result[0]
+        twitter_dict['Team'] = team
+        twitter_dict['Relevance'] = result[2]
+        twitter_dict['Popularity'] = result[3]
+
+        return twitter_dict
+
+    else:
+
+        days = [date.split(" ")[0] for date in df['when'].values]
+        df['day'] = days
+        tweetsGrouped = df[['day', 'pop', 'score']].groupby('day')['pop'].agg(np.sum)
+        tweetsGrouped1 = df[['day', 'pop', 'score']].groupby('day')['score'].agg(np.sum)
+
+        cur.execute("INSERT INTO TwitterData (Date, Team_id, Relevance, Popularity) VALUES (?,?,?,?)", (now, ident, tweetsGrouped, tweetsGrouped1))
+        conn.commit()
+
+        twitter_dict = {}
+
+        twitter_dict['Date'] = now
+        twitter_dict['Team'] = team
+        twitter_dict['Relevance'] = tweetsGrouped
+        twitter_dict['Popularity'] = tweetsGrouped1
+
+        return twitter_dict
 
 if __name__ == "__main__":
     
@@ -171,8 +219,9 @@ if __name__ == "__main__":
     twitter_client = TwitterClient()
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
+    db_maker(cur, conn)
 
-    tweets = twitter_client.keywords_search(hash_tag_list, 1000, dt.date.today()-dt.timedelta(days=30), dt.date.today())
+    tweets = twitter_client.keywords_search(hash_tag_list, 10, dt.date.today()-dt.timedelta(days=30), dt.date.today())
 
     df = tweet_analyzer.tweets_to_dataframe(tweets)
 
@@ -182,9 +231,14 @@ if __name__ == "__main__":
 
     df['score'] = tweet_analyzer.actual_score(df['sentiment'], df['likes'], df['retweets'])
 
+    print(db_add(cur, conn, hash_tag_list, df))
+    print(hash_tag_list)
+
     out = tweet_analyzer.date_grouper(df)
 
     print(out)
+
+
 
     # Time Series
     # time_likes = pd.Series(data=out['Relevance'])
