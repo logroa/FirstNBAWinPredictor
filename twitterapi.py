@@ -215,7 +215,7 @@ def db_add(cur, conn, team, df):
         print(tweetsGrouped1)
         print(tweetsGrouped.columns.tolist())
 
-        cur.execute("INSERT INTO TwitterData (Date, Relevance, Popularity) VALUES (?,?,?)", (now, tweetsGrouped, tweetsGrouped1))
+        cur.execute("INSERT INTO TwitterData (Date, Team_id, Relevance, Popularity) VALUES (?,?,?,?)", (now, ident, tweetsGrouped, tweetsGrouped1))
         conn.commit()
 
         twitter_dict = {}
