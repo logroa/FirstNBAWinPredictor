@@ -1,3 +1,4 @@
+import numpy
 import tweepy
 from tweepy import API
 from tweepy import Cursor
@@ -163,7 +164,7 @@ class TweetAnalyzer():
 
 def db_maker(cur, conn):
 
-    cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Team_id INTEGER, Relevance REAL, Popularity REAL)')
+    cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Relevance INT, Popularity INT)')
     conn.commit()
 
 def db_add(cur, conn, team, df):
@@ -177,7 +178,9 @@ def db_add(cur, conn, team, df):
         return
 
     now = date.today()
-    now = str(now)
+    now = now.strftime("%d-%b-%Y ")
+   # now = str(now)
+    print(type(now))
 
     cur.execute(f"SELECT * FROM TwitterData WHERE Team_id = '{ident}' AND Date = '{now}'")
 
@@ -197,10 +200,22 @@ def db_add(cur, conn, team, df):
 
         days = [date.split(" ")[0] for date in df['when'].values]
         df['day'] = days
-        tweetsGrouped = df[['day', 'pop', 'score']].groupby('day')['pop'].agg(np.sum)
-        tweetsGrouped1 = df[['day', 'pop', 'score']].groupby('day')['score'].agg(np.sum)
+        tweetsGrouped = df[['day', 'pop', 'score']].groupby(['day'], as_index=False)['pop'].agg(np.sum)
+        tweetsGrouped1 = df[['day', 'pop', 'score']].groupby(['day'], as_index=False)['score'].agg(np.sum)
+     #   tweetsGrouped = tweetsGrouped['pop']
+     #   tweetsGrouped1 = tweetsGrouped['score']
 
-        cur.execute("INSERT INTO TwitterData (Date, Team_id, Relevance, Popularity) VALUES (?,?,?,?)", (now, ident, tweetsGrouped, tweetsGrouped1))
+     #   tweetsGrouped = tweetsGrouped.astype(numpy.int32)
+     #   tweetsGrouped1 = tweetsGrouped.astype(numpy.int32)
+     #   tweetsGrouped = tweetsGrouped.loc[0]['pop']
+     #  tweetsGrouped1 = tweetsGrouped.loc[0]['score']
+
+        print(tweetsGrouped.head())
+        print(tweetsGrouped)
+        print(tweetsGrouped1)
+        print(tweetsGrouped.columns.tolist())
+
+        cur.execute("INSERT INTO TwitterData (Date, Relevance, Popularity) VALUES (?,?,?)", (now, tweetsGrouped, tweetsGrouped1))
         conn.commit()
 
         twitter_dict = {}
