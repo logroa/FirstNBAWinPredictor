@@ -121,4 +121,4 @@ def make_id_table():
 
 #ab = team_abrevs()
 #for keys in ab:
-    #print(stats(keys))
+#    print(stats(keys))
