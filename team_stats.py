@@ -119,6 +119,22 @@ def make_id_table():
         cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
     conn.commit()
 
+def compare_teams(team1, team2):
+    stats1 = stats(team1)
+    stats2 = stats(team2)
+    ppg_offset = stats1["Points Per Game"] - stats2["Points Per Game"]
+    rpg_offset = stats1["Rebounds Per Game"] - stats2["Rebounds Per Game"]
+    apg_offset = stats1["Assists Per Game"] - stats2["Assists Per Game"]
+    w_offset = stats1["Wins"] - stats2["Wins"]
+    l10_offset = stats1["Last 10 Win Percentage"] * 10 - stats2["Last 10 Win Percentage"] * 10
+    x_axis = ["Points", "Rebounds", "Assists", "Wins", "Wins in Last 10 Games"]
+    y_axis = [ppg_offset, rpg_offset, apg_offset, w_offset, l10_offset]
+    plt.xlabel("Stats")
+    plt.ylabel("Difference in Stats (" + stats1["Abbreviation"] + " - " + stats2["Abbreviation"] + ")")
+    plt.title(team1 + " vs. " + team2)
+    plt.bar(x_axis, y_axis)
+    plt.show()
+
 ab = team_abrevs()
 for keys in ab:
     print(stats(keys))
