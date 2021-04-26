@@ -136,6 +136,6 @@ def compare_teams(team1, team2):
     plt.bar(x_axis, y_axis)
     plt.show()
 
-ab = team_abrevs()
-for keys in ab:
-    print(stats(keys))
+#ab = team_abrevs()
+#for keys in ab:
+    #print(stats(keys))
