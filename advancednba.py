@@ -5,7 +5,6 @@ import json
 import sqlite3
 from datetime import date
 
-
 def statFinder():
     url = "http://www.espn.com/nba/hollinger/teamstats"
     r = requests.get(url)

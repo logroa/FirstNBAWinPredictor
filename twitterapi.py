@@ -164,7 +164,7 @@ class TweetAnalyzer():
 
 def db_maker(cur, conn):
 
-    cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Relevance INT, Popularity INT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Team_id INT, Relevance INT, Popularity INT)')
     conn.commit()
 
 def db_add(cur, conn, team, df):
