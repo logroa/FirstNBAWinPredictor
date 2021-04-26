@@ -123,6 +123,10 @@ def compare_teams(team1, team2):
     plt.ylabel("Difference in Stats (" + stats1["Abbreviation"] + " - " + stats2["Abbreviation"] + ")")
     plt.title(team1 + " vs. " + team2)
     plt.bar(x_axis, y_axis)
+    print("Difference in Stats Per Game (" + team1 + " - " + team2 + ")")
+    for x in range(len(x_axis)):
+        numb = round(y_axis[x], 2)
+        print(x_axis[x] + ": " + str(numb))
     plt.show()
 
 #ab = team_abrevs()

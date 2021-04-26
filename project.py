@@ -53,5 +53,6 @@ ostats = ts.stats(opponent)
 for keys in ostats:
     print(keys + ": " + str(ostats[keys]))
 
+print("")
 ts.compare_teams(team, opponent)
 print("")
