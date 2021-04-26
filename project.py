@@ -19,26 +19,34 @@ cur = conn.cursor()
 
 team = input("Enter a team name with capitalized first letters and the city (ex. Washington Wizards): ")
 print("")
-stats = ts.stats(team)
-for keys in stats:
-    print(keys + ": " + str(stats[keys]))
-print("")
 
 #advanced = an.statFinder()
 #print(advanced)
 #print("")
 
+opponent = ""
 siteList = np.odds_finder(team)
 if siteList != None:
     oddsList = []
     for i in siteList:
         oddsList.append((i[0], i[1], np.winPercCalc(i[1]), i[2], i[3]))
     np.outputter(team, oddsList)
+    opponent = oddsList[0][4]
     if len(oddsList) < 17:
         print("Game has likely already started, so the lines above are LIVE LINES")
 
     else:
-        dbMaker(cur, conn)
-        dbAddition(team, oddsList, cur, conn)
+        np.dbMaker(cur, conn)
+        np.dbAddition(team, oddsList, cur, conn)
 
+print("")
+stats = ts.stats(team)
+for keys in stats:
+    print(keys + ": " + str(stats[keys]))
+print("")
+ostats = ts.stats(opponent)
+for keys in ostats:
+    print(keys + ": " + str(ostats[keys]))
+
+ts.compare_teams(team, opponent)
 print("")

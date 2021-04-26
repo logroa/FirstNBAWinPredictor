@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 from datetime import date
+import matplotlib.pyplot as plt
 
 path = os.path.dirname(os.path.abspath(__file__))
 conn = sqlite3.connect(path+'/'+'stats.db')
@@ -135,6 +136,6 @@ def compare_teams(team1, team2):
     plt.bar(x_axis, y_axis)
     plt.show()
 
-ab = team_abrevs()
-for keys in ab:
-    print(stats(keys))
+#ab = team_abrevs()
+#for keys in ab:
+    #print(stats(keys))
