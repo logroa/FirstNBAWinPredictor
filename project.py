@@ -20,9 +20,14 @@ cur = conn.cursor()
 team = input("Enter a team name with capitalized first letters and the city (ex. Washington Wizards): ")
 print("")
 
-#advanced = an.statFinder()
-#print(advanced)
-#print("")
+abrevs = ts.team_abrevs()
+cur.execute('CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, Team TEXT, Abbreviation TEXT)')
+cur.execute("SELECT * FROM Teams")
+result = cur.fetchone()
+if not result:
+    for key in abrevs:
+        cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
+    conn.commit()
 
 opponent = ""
 siteList = np.odds_finder(team)

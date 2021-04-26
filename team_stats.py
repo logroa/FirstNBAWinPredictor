@@ -109,17 +109,6 @@ def stats(team):
         conn.commit()
         return val
 
-def make_id_table():
-    abrevs = team_abrevs()
-    cur.execute('CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, Team TEXT, Abbreviation TEXT)')
-    cur.execute("SELECT * FROM Teams")
-    result = cur.fetchone()
-    if result:
-        return
-    for key in abrevs:
-        cur.execute('INSERT INTO Teams (Team, Abbreviation) VALUES (?, ?)', (key, abrevs[key]))
-    conn.commit()
-
 def compare_teams(team1, team2):
     stats1 = stats(team1)
     stats2 = stats(team2)
