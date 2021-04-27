@@ -83,7 +83,7 @@ twitter_client = ta.TwitterClient()
 tweet_analyzer = ta.TweetAnalyzer()
 api = twitter_client.get_twitter_client_api()
 
-tweets = twitter_client.keywords_search(team, 1000, dt.date.today()-dt.timedelta(days=30), dt.date.today())
+tweets = twitter_client.keywords_search(team, 3000, dt.date.today()-dt.timedelta(days=30), dt.date.today())
 
 df = tweet_analyzer.tweets_to_dataframe(tweets)
 
