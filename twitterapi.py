@@ -10,9 +10,11 @@ import datetime as dt
 from datetime import date
 
 from textblob import TextBlob
-
+from pandasql import sqldf
+import pandasql as ps
 import numpy as np
 import pandas as pd
+from sqlalchemy import create_engine
 import re
 import matplotlib.pyplot as plt
 import os
@@ -133,7 +135,6 @@ class TweetAnalyzer():
     def tweet_pop(self, likes, retweets):
         return 6 + 3*retweets + likes
 
-
     def actual_score(self, sentiment, likes, retweets):
         return sentiment * (6 + 3*retweets + likes)
 
@@ -167,7 +168,7 @@ def db_maker(cur, conn):
     cur.execute('CREATE TABLE IF NOT EXISTS TwitterData (Date TEXT, Team_id INT, Relevance INT, Popularity INT)')
     conn.commit()
 
-def db_add(cur, conn, team, df):
+def db_add(cur, conn, team, score, pop):
 
     cur.execute(f'SELECT * FROM Teams WHERE Team = "{team}"')
     result = cur.fetchone()
@@ -178,9 +179,14 @@ def db_add(cur, conn, team, df):
         return
 
     now = date.today()
-    now = now.strftime("%d-%b-%Y ")
-   # now = str(now)
+   # now = now.strftime("%d-%b-%Y ")
+    now = str(now)
     print(type(now))
+
+   # new_pop = int(pop)
+   # print(new_pop)
+  #  new_score = int(score)
+ #   print(new_score)
 
     cur.execute(f"SELECT * FROM TwitterData WHERE Team_id = '{ident}' AND Date = '{now}'")
 
@@ -205,17 +211,20 @@ def db_add(cur, conn, team, df):
      #   tweetsGrouped = tweetsGrouped['pop']
      #   tweetsGrouped1 = tweetsGrouped['score']
 
-     #   tweetsGrouped = tweetsGrouped.astype(numpy.int32)
-     #   tweetsGrouped1 = tweetsGrouped.astype(numpy.int32)
-     #   tweetsGrouped = tweetsGrouped.loc[0]['pop']
+        new_score = tweetsGrouped.astype(numpy.int32)
+        new_pop = tweetsGrouped.astype(numpy.int32)
+
+        print(new_score)
+        print(new_pop)
+
+        #   tweetsGrouped = tweetsGrouped.loc[0]['pop']
      #  tweetsGrouped1 = tweetsGrouped.loc[0]['score']
 
-        print(tweetsGrouped.head())
-        print(tweetsGrouped)
-        print(tweetsGrouped1)
+        print(new_pop.head())
+
         print(tweetsGrouped.columns.tolist())
 
-        cur.execute("INSERT INTO TwitterData (Date, Team_id, Relevance, Popularity) VALUES (?,?,?,?)", (now, ident, tweetsGrouped, tweetsGrouped1))
+        cur.execute("INSERT INTO TwitterData (Date, Team_id, Relevance, Popularity) VALUES (?,?,?,?)", (now, ident, new_score, new_pop))
         conn.commit()
 
         twitter_dict = {}
@@ -229,14 +238,14 @@ def db_add(cur, conn, team, df):
 
 if __name__ == "__main__":
     
-    hash_tag_list = input("Enter something to be searched on Twitter: ")
+    team_name = input("Enter a Team Name ")
 
     twitter_client = TwitterClient()
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
-    db_maker(cur, conn)
+  #  db_maker(cur, conn)
 
-    tweets = twitter_client.keywords_search(hash_tag_list, 10, dt.date.today()-dt.timedelta(days=30), dt.date.today())
+    tweets = twitter_client.keywords_search(team_name, 1000, dt.date.today() - dt.timedelta(days=30), dt.date.today())
 
     df = tweet_analyzer.tweets_to_dataframe(tweets)
 
@@ -246,17 +255,15 @@ if __name__ == "__main__":
 
     df['score'] = tweet_analyzer.actual_score(df['sentiment'], df['likes'], df['retweets'])
 
-    print(db_add(cur, conn, hash_tag_list, df))
-    print(hash_tag_list)
+   # print(db_add(cur, conn, team_name, score, pop))
+    print(team_name)
 
     out = tweet_analyzer.date_grouper(df)
 
     print(out)
 
-
-
     # Time Series
-    # time_likes = pd.Series(data=out['Relevance'])
-    # time_likes.plot(figsize=(16, 4), color='r')
-    # plt.show()
-    # out.plot(x='day', y=['Relevance', 'Popularity'], grid=True)
+    time_likes = pd.Series(data=out['Relevance'])
+    time_likes.plot(figsize=(16, 4), color='r')
+    plt.show()
+    out.plot(x='day', y=['Relevance', 'Popularity'], grid=True)
