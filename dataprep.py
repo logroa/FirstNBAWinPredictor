@@ -6,7 +6,16 @@ import sqlite3
 from datetime import date
 
 def askDate():
-    x = input("Please enter a date in YYYYmmdd format (Ex. 20210426): ")
+    while True:
+        x = input("Please enter a date in YYYYmmdd format (Ex. 20210426): ")
+        tods = str(date.today())
+        num = tods[0:4] + tods[5:7] + tods[8:10]
+        if int(x) >= int(num):
+            print("Please enter a data that has completed games played")
+        elif int(x) > 20210415:
+            break
+        else:
+            print("Please enter a more recent data.")
     return x
 
 def abrvConverter(abr):
@@ -64,6 +73,37 @@ def winloseTable(scores):
     for i in scores:
         insertInto(i, cur, conn)
 
+    combiner(cur, conn)
+
+def combiner(cur, conn):
+    dataList = []
+    cur.execute('''SELECT * FROM Team_Stats INNER JOIN AdvStats ON Team_Stats.Team_id = AdvStats.Team_id AND Team_Stats.Last_updated = AdvStats.Date
+                INNER JOIN Moneylines ON AdvStats.Team_id = Moneylines.Team_id AND AdvStats.Date = Moneylines.Date INNER JOIN Winners 
+                ON Moneylines.Date = Winners.Date AND (Moneylines.Team_id = Winners.Team_id OR Moneylines.Opponent_id = Winners.Team_id)''')
+    for i in cur:
+        home = 0
+        if i[22] == "Yes":
+            home = 1
+        winner = 0
+        if i[57] == i[0]:
+            winner = 1
+        dataList.append([i[8], i[0], home, i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[11], i[12], i[13], i[14], i[15], i[16], i[17], i[18], i[19], i[23], winner])
+    modelDat = []
+    for j in dataList:
+        cur.execute('''SELECT * FROM Team_Stats INNER JOIN AdvStats ON Team_Stats.Team_id = AdvStats.Team_id AND Team_Stats.Last_updated = AdvStats.Date WHERE Team_Stats.Team_id = ? AND Team_Stats.Last_updated = ?''', (j[19], j[0]))
+        add = j
+        oppStats = cur.fetchone()
+        nums = [1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        for k in range(0, len(oppStats)):
+            if k in nums:
+                add.append(oppStats[k])
+        modelDat.append(add)
+    
+    return modelDat
+
+
+
+    print(dataList)
 
 def fullJob():
     winloseTable(winFinder())
