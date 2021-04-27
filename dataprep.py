@@ -8,7 +8,7 @@ import csv
 
 def askDate():
     x = str(date.today())
-    y = x[0:4]+[5:7]+[8:10]
+    y = x[0:4]+x[5:7]+x[8:10]
     return str(int(y)-1)
 
 def abrvConverter(abr):
@@ -67,6 +67,7 @@ def winloseTable(scores):
         insertInto(i, cur, conn)
 
     writeCSV(combiner(cur, conn))
+    writeToday(todayPred(cur, conn))
 
 def combiner(cur, conn):
     dataList = []
@@ -93,6 +94,45 @@ def combiner(cur, conn):
         modelDat.append(add)
     
     return modelDat
+
+def todayPred(cur, conn):
+    dataList = []
+    cur.execute('''SELECT * FROM Team_Stats INNER JOIN AdvStats ON Team_Stats.Team_id = AdvStats.Team_id AND Team_Stats.Last_updated = AdvStats.Date
+                INNER JOIN Moneylines ON AdvStats.Team_id = Moneylines.Team_id AND AdvStats.Date = Moneylines.Date WHERE Team_Stats.Last_updated = ?''', (str(date.today()),))
+    for i in cur:
+        home = 0
+        if i[22] == "Yes":
+            home = 1
+        dataList.append([i[8], i[0], home, i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[11], i[12], i[13], i[14], i[15], i[16], i[17], i[18], i[19], i[23]])
+    modelDat = []
+    day = str(date.today())
+    for j in dataList:
+        cur.execute('''SELECT * FROM Team_Stats INNER JOIN AdvStats ON Team_Stats.Team_id = AdvStats.Team_id AND Team_Stats.Last_updated = AdvStats.Date WHERE Team_Stats.Team_id = ? AND Team_Stats.Last_updated = ?''', (j[19], day))
+        add = j
+        oppStats = cur.fetchone()
+        nums = [1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        for k in range(0, len(oppStats)):
+            if k in nums:
+                add.append(oppStats[k])
+        modelDat.append(add)
+    
+    return modelDat
+
+def writeToday(stats):
+    columnNames = ["date", "team_id", "home", "PPG", "RPG", "APG", 
+                    "ptsAllowed", "wins", "losses", "winPctL10", "pace", 
+                    "toRat", "offRebRate", "defRebRate", "rebRate", "effFGpct", 
+                    "trueSP", "offEff", "defEff", "opponent_id", 
+                    "oppPPG", "oppRPG", "oppAPG", "oppptsAllowed", "oppwins",
+                    "opplosses", "oppwinPctL10", "opppace", "opptoRat", 
+                    "oppoffRebRate", "oppdefRebRate", "opprebRate", 
+                    "oppeffFGpct", "opptrueSP", "oppoffEff", "oppdefEff"]
+    with open('todayData.csv', 'w+') as file:
+        author = csv.writer(file)
+        author.writerow(columnNames)
+        for i in stats:
+            author.writerow(i)
+    print("Today's data prepared and exported in CSV.")    
 
 def writeCSV(stats):
     columnNames = ["date", "team_id", "home", "PPG", "RPG", "APG", 
