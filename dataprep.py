@@ -4,6 +4,7 @@ import os
 import json
 import sqlite3
 from datetime import date
+import csv
 
 def askDate():
     while True:
@@ -73,7 +74,7 @@ def winloseTable(scores):
     for i in scores:
         insertInto(i, cur, conn)
 
-    combiner(cur, conn)
+    writeCSV(combiner(cur, conn))
 
 def combiner(cur, conn):
     dataList = []
@@ -101,9 +102,23 @@ def combiner(cur, conn):
     
     return modelDat
 
+def writeCSV(stats):
+    columnNames = ["date", "team_id", "home", "PPG", "RPG", "APG", 
+                    "ptsAllowed", "wins", "losses", "winPctL10", "pace", 
+                    "toRat", "offRebRate", "defRebRate", "rebRate", "effFGpct", 
+                    "trueSP", "offEff", "defEff", "opponent_id", "win", 
+                    "oppPPG", "oppRPG", "oppAPG", "oppptsAllowed", "oppwins",
+                    "opplosses", "oppwinPctL10", "opppace", "opptoRat", 
+                    "oppoffRebRate", "oppdefRebRate", "opprebRate", 
+                    "oppeffFGpct", "opptrueSP", "oppoffEff", "oppdefEff"]
+    with open('modelData.csv', 'w+') as file:
+        author = csv.writer(file)
+        author.writerow(columnNames)
+        for i in stats:
+            author.writerow(i)
+    print("Model data prepared and exported in CSV.")
 
 
-    print(dataList)
 
 def fullJob():
     winloseTable(winFinder())
