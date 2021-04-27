@@ -37,3 +37,8 @@ confusion_matrix(y_test, predictions)
 
 plot_confusion_matrix(logreg, X_test, y_test, normalize='true')
 plot_roc_curve(logreg, X_test, y_test)
+
+print("pred: ")
+print(predictions)
+print("actual: ")
+print(y_test)

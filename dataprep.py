@@ -7,17 +7,9 @@ from datetime import date
 import csv
 
 def askDate():
-    while True:
-        x = input("Please enter a date in YYYYmmdd format (Ex. 20210426): ")
-        tods = str(date.today())
-        num = tods[0:4] + tods[5:7] + tods[8:10]
-        if int(x) >= int(num):
-            print("Please enter a data that has completed games played")
-        elif int(x) > 20210415:
-            break
-        else:
-            print("Please enter a more recent data.")
-    return x
+    x = str(date.today())
+    y = x[0:4]+[5:7]+[8:10]
+    return str(int(y)-1)
 
 def abrvConverter(abr):
     teams = {
@@ -122,7 +114,7 @@ def writeCSV(stats):
 
 def fullJob():
     winloseTable(winFinder())
-    print("Database updated.")
+    print("Yesterday's wins added to database.")
 
 if __name__ == "__main__":
     fullJob()
