@@ -7,6 +7,7 @@ import nbaapi as nba
 import sqlite3
 import twitterapi as ta
 import advancednba as an
+import regressionmodeling as rm
 
 import numpy
 import tweepy
@@ -99,5 +100,6 @@ print(out)
 # Time Series
 time_likes = pd.Series(data=out['Relevance'])
 time_likes.plot(figsize=(16, 4), color='r')
-plt.show()
 out.plot(x='day', y=['Relevance', 'Popularity'], grid=True)
+
+rm.modelMaker(team)
