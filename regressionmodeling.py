@@ -5,12 +5,15 @@ import seaborn as sb
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-
+import sqlite3
+import os
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, plot_confusion_matrix, precision_recall_curve, plot_precision_recall_curve, plot_roc_curve
 
 df = pd.read_csv("modelData.csv")
+todayGames = pd.read_csv("todayData.csv")
 
 df = df.drop('date', 1)
+todayGames = todayGames.drop('date', 1)
 
 y = df[['win']]
 X = df.drop('win', 1)
@@ -38,7 +41,20 @@ confusion_matrix(y_test, predictions)
 plot_confusion_matrix(logreg, X_test, y_test, normalize='true')
 plot_roc_curve(logreg, X_test, y_test)
 
-print("pred: ")
-print(predictions)
-print("actual: ")
-print(y_test)
+path = os.path.dirname(os.path.abspath(__file__))
+conn = sqlite3.connect(path + '/' + 'stats.db')
+cur = conn.cursor()
+
+print("Today's Predictions: ")
+todayPred = logreg.predict(todayGames)
+todayGames['winPred'] = todayPred
+for key, i in todayGames.iterrows():
+    cur.execute("SELECT Team FROM Teams WHERE id = ?", (i['team_id'],))
+    tname = cur.fetchone()[0]
+    cur.execute("SELECT Team FROM Teams WHERE id = ?", (i['opponent_id'],))
+    oname = cur.fetchone()[0]
+    word = ""
+    if i['winPred'] == 0:
+        word = "not "
+    print(tname + " are " + word + "projected to beat " + oname + " today.")
+    

@@ -158,4 +158,5 @@ def fullJob():
 
 if __name__ == "__main__":
     fullJob()
+    conn.commit()
 
