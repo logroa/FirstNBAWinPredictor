@@ -10,8 +10,8 @@ def odds_finder(team_name):
     querystring = {"sport":"basketball_nba","region":"us","mkt":"h2h","dateFormat":"iso","oddsFormat":"american"}
 
     headers = {
-        'x-rapidapi-key': "275189ae59mshe64ed3181a235dcp122fabjsn5cf4e3c2ac01",
-        'x-rapidapi-host': "odds.p.rapidapi.com"
+        'x-rapidapi-key': "xxxxxxxxxxxxxxxxxxxxxx",
+        'x-rapidapi-host': "xxxxxxxxxxxxxxxxxxxxx"
         }
 
     response = requests.request("GET", url, headers=headers, params=querystring)
